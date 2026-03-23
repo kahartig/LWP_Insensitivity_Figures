@@ -1,0 +1,112 @@
+# TOML configuration file defining parameters to run regrid_era5.py
+######################################################################
+name = "Run configuration file for regrid_era5.py"
+version = "0.3.0"
+date = "3 December 2024"
+######################################################################
+[settings]
+  system = 'casper'
+  file_pre = 'era5-'
+  dt_beg = 2000-01-01  # YYYY-MM-DD, DD is ignored for monthly processing
+  dt_end = 2024-12-31
+  time_int       = 'hr'      # options: hr = hourly, mo = monthly
+  hourly_int     = '1h'      # options: 1h, 3h, 6h (not used for monthly)
+  dom_name       = 'ease_25km'  # domain name of destination grid
+  dom_name_txt   = 'EASE v2 25km'
+  dom_file       = 'EASE2_25km_clipcorners.nc'  # file name with destination grid
+  dom_type       = 'EASE2'  # destination grid type
+  lat_rng        = [30,90]   # latitude range, if using dom_type = 'latlon'
+  lon_rng        = [-180,180]  # longitude range, if using dom_type = 'latlon'
+  lon_360_to_180 = true
+  use_units_alt  = false  # convert field to specified units_alt
+  nc_compression = true   # use compression with nc output file
+  plev = [1000,925,850,700,500,300,200]
+  [settings.casper]
+    path_e5  = '/glade/campaign/collections/rda/data'
+    path_dom = '/glade/u/home/kara/arcticclouds_project/alaskan_SOM/regridding/domains'
+    path_out = '/glade/derecho/scratch/kara/ERA5_1hr'
+  [settings.haboob]
+    path_e5  = '/data/seefeldm/ERA5'
+    path_out = '/data/seefeldm/ERA5/rasm_50km'
+    path_dom = '/data/rasm/data/geo_em/V3.2/50km'
+######################################################################
+[flds_fl]
+  zg         = false # geopotential
+  ta         = false # temperature
+  hus        = false # specific humidity
+  ua         = false # u component of wind
+  va         = false # v component of wind
+  wa         = false # w component of wind (hourly)
+  wap        = false # vertical velocity
+  hur        = false # relative humidity
+  cl         = false # cloud cover
+  clw        = false # specific cloud liquid water content
+  cli        = false # specific cloud ice water content
+  clr        = false # specific rain water content
+  cls        = false # specific snow water content
+  div        = false # divergence
+  rv         = false # relative vorticity
+  vorpot     = false # potential vorticity
+  ps         = false # surface pressure
+  psl        = true  # mean sea level pressure 
+  ts         = false # skin temperature
+  tas        = false # 2 m temperature
+  tdps       = false # 2 m dewpoint 
+  uas        = false # 10 m u component wind
+  vas        = false # 10 m v component wind
+  zmla       = false # boundary layer height
+  clt        = false # total cloud cover
+  cll        = false # low cloud cover
+  clm        = false # medium cloud cover
+  clh        = false # high cloud cover
+  tcw        = false # total column water
+  prw        = false # total column water vapor
+  clwvi      = false # total column liquid water
+  clivi      = false # total column ice water
+  siconc     = false # sea ice cover
+  albsn      = false # snow albedo
+  tos        = false # sea surface temperature
+  snd        = false # snow depth
+  z0         = false # forcast surface roughness
+  sfcWind    = false # 10 m wind speed
+  tcwr       = false # total column rain water
+  tcwi       = false # total column snow water
+  cape       = false # CAPE - convective available potential energy
+  pr         = false # mean total precipitation rate
+  prs        = false # mean large scale precipitation rate
+  prc        = false # mean convective precipitation rate
+  prsn       = false # mean snowfall rate
+  prlsns     = false # mean large scale snowfall rate
+  prsnc      = false # mean convective snowfall rate
+  hfss       = false # mean surface sensible heat flux
+  hfls       = false # mean surface latent heat flux
+  rsds       = false # mean surface downward shortwave radiation flux
+  rss        = false # mean surface net shortwave radiation flux  
+  rlds       = false # mean surface downward longwave radiation flux
+  rls        = false # mean surface net longwave radiation flux  
+  rsdt       = false # mean top downward shortwave radiation flux
+  rst        = false # mean top net shortwave radiation flux
+  rlt        = false # mean top net longwave radiation flux
+  tauu       = false # mean eastward turbulent surface stress
+  tauv       = false # mean northward turbulent surface stress
+  rsdscs     = false # mean surface downward shortwave radiation flux clear sky
+  rsscs      = false # mean surface net shortwave radiation flux clear sky
+  rldscs     = false # mean surface downward longwave radiation flux, clear sky
+  rlscs      = false # mean surface net longwave radiation flux clear sky
+  rstcs      = false # mean top net shortwave radiation flux clear sky
+  rltcs      = false # mean top net longwave radiation flux clear sky
+  evspsbl    = false # mean evaporation rate
+  evspsblpot = false # mean potential evaporation rate
+  sbl        = false # mean snow evaporation rate
+  mrro       = false # mean runoff rate
+  mrros      = false # mean surface runoff rate
+  mrrob      = false # mean sub surface runoff rate
+  snm        = false # mean snowmelt rate
+  # these two should be removed because invariant data is handled separately but they
+  # are included in info_ds633.0.toml as flds_e5, until that changes they are included
+  orog       = false # geopotential (at the sfc) -> need to convert to suface height (m)
+  sftlf      = false # land sea mask
+  # added by Kara to match entries in flds_gen_info and info_ds633.0
+  frvel      = false # friction velocity; added by Kara
+  clbz       = false # cloud base height; added by Kara
+

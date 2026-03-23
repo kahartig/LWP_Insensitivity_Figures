@@ -1,0 +1,415 @@
+# TOML configuration file defining parameters for atmospheric and climate
+#  fields from ds633.0 (ERA5 - hourly at NCAR-RDA)
+name = "Atmosphere / Climate Fields Info From ERA5 - ds633.0"
+version = "0.2.0"
+date = "19 April 2024"
+
+[sys]
+  [sys.casper]
+    path_e5 = "/glade/campaign/collections/rda/data"
+  [sys.haboob]
+    path_e5 = "/data/seefeldm/ERA5"
+[flds]
+  [flds.orog]
+    fl = true
+    units = 'm2 s-2'
+    shrt = 'Z'
+    long = '128_129_z'
+    prefix = 'e5.oper.invariant'
+  [flds.sftlf]
+    fl = true
+    units = '(0-1)'
+    shrt = 'LSM'
+    long = '128_172_lsm'
+    prefix = 'e5.oper.invariant'
+  [flds.zg]
+    fl = true
+    units = 'm**2 s**-2'
+    shrt = 'Z'
+    long = '128_129_z'
+    prefix = 'e5.oper.an.pl'
+  [flds.ta]
+    fl = true
+    units = 'K'
+    shrt = 'T'
+    long = '128_130_t'
+    prefix = 'e5.oper.an.pl'
+  [flds.hus]
+    fl = true
+    units = 'kg/kg'
+    shrt = 'Q'
+    long = '128_133_q'
+    prefix = 'e5.oper.an.pl'
+  [flds.ua]
+    fl = true
+    units = 'm/s'
+    shrt = 'U'
+    long = '128_131_u'
+    prefix = 'e5.oper.an.pl'
+  [flds.va]
+    fl = true
+    units = 'm/s'
+    shrt = 'V'
+    long = '128_132_v'
+    prefix = 'e5.oper.an.pl'
+  [flds.wap]
+    fl = true
+    units = 'Pa/s'
+    shrt = 'W'
+    long = '128_135_w'
+    prefix = 'e5.oper.an.pl'
+  [flds.hur]
+    fl = false
+    units = '%'
+    shrt = 'R'
+    long = '128_157_r'
+    prefix = 'e5.oper.an.pl'
+  [flds.cl]
+    fl = false
+    units = '(0-1)'
+    shrt = 'CC'
+    long = '128_248_cc'
+    prefix = 'e5.oper.an.pl'
+  [flds.clw]
+    fl = false
+    units = 'kg/kg'
+    shrt = 'CLWC'
+    long = '128_246_clwc'
+    prefix = 'e5.oper.an.pl'
+  [flds.cli]
+    fl = false
+    units = 'kg/kg'
+    shrt = 'CIWC'
+    long = '128_247_ciwc'
+    prefix = 'e5.oper.an.pl'
+  [flds.div]
+    fl = false
+    units = 's-1'
+    shrt = 'D'
+    long = '128_155_d'
+    prefix = 'e5.oper.an.pl'
+  [flds.rv]
+    fl = false
+    units = 's-1'
+    shrt = 'VO'
+    long = '128_138_vo'
+    prefix = 'e5.oper.an.pl'
+  [flds.vorpot]
+    fl = false
+    units = 'K m2 kg-1 s-1'
+    shrt = 'PV'
+    long = '128_060_pv'
+    prefix = 'e5.oper.an.pl'
+  [flds.clr]
+    fl = false
+    units = 'kg/kg'
+    shrt = 'CRWC'
+    long = '128_075_crwc'
+    prefix = 'e5.oper.an.pl'
+  [flds.cls]
+    fl = false
+    units = 'kg/kg'
+    shrt = 'CSWC'
+    long = '128_076_cswc'
+    prefix = 'e5.oper.an.pl'
+  [flds.ps]
+    fl = true
+    units = 'Pa'
+    shrt = 'SP'
+    long = '128_134_sp'
+    prefix = 'e5.oper.an.sfc'
+  [flds.psl]
+    fl = true
+    units = 'Pa'
+    shrt = 'MSL'
+    long = '128_151_msl'
+    prefix = 'e5.oper.an.sfc'
+  [flds.ts ]
+    fl = true
+    units = 'K'
+    shrt = 'SKT'
+    long = '128_235_skt'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tas]
+    fl = true
+    units = 'K'
+    shrt = 'VAR_2T'
+    long = '128_167_2t'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tdps]
+    fl = true
+    units = 'K'
+    shrt = 'VAR_2D'
+    long = '128_168_2d'
+    prefix = 'e5.oper.an.sfc'
+  [flds.uas]
+    fl = true
+    units = 'm/s'
+    shrt = 'VAR_10U'
+    long = '128_165_10u'
+    prefix = 'e5.oper.an.sfc'
+  [flds.vas]
+    fl = true
+    units = 'm/s'
+    shrt = 'VAR_10V'
+    long = '128_166_10v'
+    prefix = 'e5.oper.an.sfc'
+  [flds.zmla]
+    fl = true
+    units = 'm'
+    shrt = 'BLH'
+    long = '128_159_blh'
+    prefix = 'e5.oper.an.sfc'
+  [flds.clt]
+    fl = true
+    units = '(0-1)'
+    shrt = 'TCC'
+    long = '128_164_tcc'
+    prefix = 'e5.oper.an.sfc'
+  [flds.cll]
+    fl = true
+    units = '(0-1)'
+    shrt = 'LCC'
+    long = '128_186_lcc'
+    prefix = 'e5.oper.an.sfc'
+  [flds.clm]
+    fl = true
+    units = '(0-1)'
+    shrt = 'MCC'
+    long = '128_187_mcc'
+    prefix = 'e5.oper.an.sfc'
+  [flds.clh]
+    fl = true
+    units = '(0-1)'
+    shrt = 'HCC'
+    long = '128_188_hcc'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tcw]
+    fl = true
+    units = 'kg m-2'
+    shrt = 'TCW'
+    long = '128_136_tcw'
+    prefix = 'e5.oper.an.sfc'
+  [flds.prw]
+    fl = true
+    units = 'kg m-2'
+    shrt = 'TCWV'
+    long = '128_137_tcwv'
+    prefix = 'e5.oper.an.sfc'
+  [flds.clwvi]
+    fl = true
+    units = 'kg m-2'
+    shrt = 'TCLW'
+    long = '128_078_tclw'
+    prefix = 'e5.oper.an.sfc'
+  [flds.clivi]
+    fl = true
+    units = 'kg m-2'
+    shrt = 'TCIW'
+    long = '128_079_tciw'
+    prefix = 'e5.oper.an.sfc'
+  [flds.siconc]
+    fl = true
+    units = '(0-1)'
+    shrt = 'CI'
+    long = '128_031_ci'
+    prefix = 'e5.oper.an.sfc'
+  [flds.albsn]
+    fl = true
+    units = '(0-1)'
+    shrt = 'ASN'
+    long = '128_032_asn'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tos]
+    fl = true
+    units = 'K'
+    shrt = 'SSTK'
+    long = '128_034_sstk'
+    prefix = 'e5.oper.an.sfc'
+  [flds.snd]
+    fl = true
+    units = 'm of water equiv'
+    shrt = 'SD'
+    long = '128_141_sd'
+    prefix = 'e5.oper.an.sfc'
+  [flds.z0]
+    fl = true
+    units = 'm'
+    shrt = 'FSR'
+    long = '128_244_fsr'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tcwr]
+    fl = false
+    units = 'kg m-2'
+    shrt = 'TCRW'
+    long = '228_089_tcrw'
+    prefix = 'e5.oper.an.sfc'
+  [flds.tcwi]
+    fl = false
+    units = 'kg m-2'
+    shrt = 'TCSW'
+    long = '228_090_tcsw'
+    prefix = 'e5.oper.an.sfc'
+  [flds.cape]
+    fl = false
+    units = 'J kg-1'
+    shrt = 'CAPE'
+    long = '128_059_cape'
+    prefix = 'e5.oper.an.sfc'
+
+  [flds.pr]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MTPR'
+    long = '235_055_mtpr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.prs]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MLSPR'
+    long = '235_029_mlspr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.prc]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MCPR'
+    long = '235_030_mcpr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.prsn ]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MSR'
+    long = '235_031_msr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.prlsns]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MLSSR'
+    long = '235_057_mlssr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.prsnc]
+    fl = true
+    units = 'kg m-2 s-1'
+    shrt = 'MCSR'
+    long = '235_056_mcsr'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.hfss]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSSHF'
+    long = '235_033_msshf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.hfls]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSLHF'
+    long = '235_034_mslhf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rsds]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSDWSWRF'
+    long = '235_035_msdwswrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rss]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSNSWRF'
+    long = '235_037_msnswrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rlds]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSDWLWRF'
+    long = '235_036_msdwlwrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rls]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MSNLWRF'
+    long = '235_038_msnlwrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rsdt]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MTDWSWRF'
+    long = '235_053_mtdwswrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rst]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MTNSWRF'
+    long = '235_039_mtnswrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rlt]
+    fl = true
+    units = 'W m-2'
+    shrt = 'MTNLWRF'
+    long = '235_040_mtnlwrf'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.tauu]
+    fl = true
+    units = 'N m-2'
+    shrt = 'METSS'
+    long = '235_041_metss'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.tauv]
+    fl = true
+    units = 'N m-2'
+    shrt = 'MNTSS'
+    long = '235_042_mntss'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  #[flds.prsfr]
+  #  fl = false
+  #  units = 'proportion'
+  #  shrt = 'MLSPF'
+  #  long = '235_026_mlspf'
+  #  prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rsdscs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MSDWSWRFCS'
+    long = '235_068_msdwswrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rsscs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MSNSWRFCS'
+    long = '235_051_msnswrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rldscs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MSDWLWRFCS'
+    long = '235_069_msdwlwrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rlscs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MSNLWRFCS'
+    long = '235_052_msnlwrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rstcs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MTNSWRFCS'
+    long = '235_049_mtnswrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.rltcs]
+    fl = false
+    units = 'W m-2'
+    shrt = 'MTNLWRFCS'
+    long = '235_050_mtnlwrfcs'
+    prefix = 'e5.oper.fc.sfc.meanflux'
+  [flds.frvel]
+    fl = true
+    units = 'm/s'
+    shrt = 'ZUST'
+    long = '228_003_zust'
+    prefix = 'e5.oper.fc.sfc.instan'
+  [flds.clbz]
+    fl = true
+    units = 'm'
+    shrt = 'CBH'
+    long = '228_023_cbh'
+    prefix = 'e5.oper.fc.sfc.instan'
