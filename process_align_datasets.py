@@ -27,7 +27,7 @@ def check_bad_date(year=None, month=None, day=None,
     return
 
 # Set where to save processed files
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Code_Repo/'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
 
 
 # Load data
@@ -229,6 +229,21 @@ rad_duringsondes = rad_hourly.reindex(time=cloud_duringsondes.time, method='near
 meteo_duringsondes = meteo_hourly.reindex(time=cloud_duringsondes.time, method='nearest', tolerance=pd.Timedelta(hours=1))
 ceil_duringsondes = ceil_hourly.reindex(time=cloud_duringsondes.time, method='nearest', tolerance=pd.Timedelta(hours=1))
 sonde_duringsondes = sonde_qc.reindex(time=cloud_duringsondes.time, method='nearest', tolerance=pd.Timedelta(hours=1))
+
+# Impose 50% validity threshold in hourly averages
+# if too few valid values exist per hour, replace hourly mean with NaN
+valid_thresh = 0.5
+ds_keys_map = {'MWR': (water_qc, water_duringsondes, ['be_lwp', 'be_pwv']), 'Ceil': (ceil_qc, ceil_duringsondes, ['first_cbh',])}
+for name, val in ds_keys_map.items():
+    ds, ds_duringsondes, var_keys = val
+    for key in var_keys:
+        # Determine fraction valid per hour
+        num_valid_per_hour = ds[key].resample(time='1h', label='left').count(dim='time')
+        num_elements_per_hour = np.isnan(ds[key]).resample(time='1h', label='left').count('time') # converts to boolean, so both NaN and non-NaN are counted
+        frac_valid = num_valid_per_hour / num_elements_per_hour
+        # Apply threshold to hourly means
+        frac_duringsonde = frac_valid.reindex(time=cloud_duringsondes.time, method='nearest', tolerance=pd.Timedelta(hours=1))
+        ds_duringsondes[key] = ds_duringsondes[key].where(frac_duringsonde >= valid_thresh, np.nan) # replace with NaN if below threshold
 
 
 # Add variables to sondes
