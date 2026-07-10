@@ -30,9 +30,9 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.util import add_cyclic_point
 
-LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Code_Repo/'
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Figures'
-APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Supplemental_Figures'
+LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_30Jun'
+APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_30Jun'
 master_som_dir = '/Users/kaha4750/Library/CloudStorage/OneDrive-UCB-O365/Documents/Arctic_Clouds_Project/Alaskan_SOM'
 
 # Load datasets
@@ -194,7 +194,7 @@ Z_sfc2d = ease_data['orog']
 
 # Line up SOM node index with sonde time dimension
 som_node_idx = xr.open_dataarray(som_node2datetime_fn)
-som_node = som_node_idx.reindex_like(cloud_duringsondes.time, method='nearest',
+som_node = som_node_idx.reindex_like(cloud_data.time, method='nearest',
                                      tolerance=pd.Timedelta(hours=2), fill_value=np.nan)
 
 
@@ -463,7 +463,7 @@ save_filename = os.path.join(SAVE_DIR, 'cloud_occurrence.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### T-q jointplot ###
@@ -627,7 +627,7 @@ save_filename = os.path.join(SAVE_DIR, 'Tq_LWPad_LWPbybin.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Cloud water by PWV percentile ###
@@ -697,7 +697,7 @@ save_filename = os.path.join(SAVE_DIR, 'PWV_percentiles_cloudwater.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Wind direction: meteo and cloud properties ###
@@ -894,7 +894,7 @@ save_filename = os.path.join(SAVE_DIR, 'wind_conditions.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Wind roses by SOM node ###
@@ -995,7 +995,7 @@ save_filename = os.path.join(SAVE_DIR, 'SOM_windroses.png')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight', dpi=300)
-plt.show()
+# plt.show()
 
 
 ### T/q profiles by SOM node ###
@@ -1062,7 +1062,7 @@ save_filename = os.path.join(SAVE_DIR, 'SOM_Tq.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Cloud water by SOM node ###
@@ -1196,7 +1196,7 @@ save_filename = os.path.join(SAVE_DIR, 'SOM_cloudwater.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 ############################
 ### Supplemental Figures ###
@@ -1254,7 +1254,7 @@ ax.text(0.02, 0.9, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecol
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### DownLW vs LWP, mark LWP categories ###
@@ -1286,7 +1286,7 @@ ax.set(title='Downwelling LW vs LWP in winter at NSA', xlabel='LWP (g m-2)', yla
 print('Save to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Grid of sigdiff for PWV cloud water distributions ###
@@ -1375,7 +1375,7 @@ ax.text(0.02, 1.1, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecol
 print('Save to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### LWP vs SatDepth colored by IWP w/i saturated layers ['in T-q jointplot'] ###
@@ -1430,7 +1430,7 @@ ax.legend()
 print('Save to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 ### Total cloud water path and PWV by PWV percentile, LWP vs IWP for 90th percentile ###
 save_filename = os.path.join(APPENDIX_SAVE_DIR, 'TCW_PWV_LWPvsIWP_vsPWVbins.pdf')
@@ -1517,7 +1517,7 @@ ax.text(0.04, 0.93, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(faceco
 print('Save to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Wind direction climatology at 500 m ###
@@ -1552,7 +1552,7 @@ ax.set(title='NSA wind direction climatology at {} m'.format(z_wind), xlabel='Di
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### By wind direction, all showing the same subset of cases ###
@@ -1729,7 +1729,7 @@ ax.text(0.01, 1.04, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(faceco
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Ice above vs in vs below liquid ###
@@ -1838,7 +1838,7 @@ axd['B'].text(0.02, 0.93, '(b)', transform=axd['B'].transAxes, fontsize=12, bbox
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 
@@ -1911,7 +1911,7 @@ ax.legend(loc='upper left')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
 
 ### Conditions during PWV>90th vs climatology ###
@@ -1972,5 +1972,5 @@ ax.text(0.02, 1.03, '(d)', transform=ax.transAxes, fontsize=12, bbox=dict(faceco
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
-plt.show()
+# plt.show()
 
