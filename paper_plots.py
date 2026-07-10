@@ -31,8 +31,8 @@ import cartopy.feature as cfeature
 from cartopy.util import add_cyclic_point
 
 LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_30Jun'
-APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_30Jun'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_10July'
+APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_10July'
 master_som_dir = '/Users/kaha4750/Library/CloudStorage/OneDrive-UCB-O365/Documents/Arctic_Clouds_Project/Alaskan_SOM'
 
 # Load datasets
@@ -42,6 +42,10 @@ rad_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_rad.nc'))
 meteo_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_meteo.nc'))
 ceil_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_ceil.nc'))
 sonde_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_sonde.nc'))
+
+# Replace LWP with conditional hourly average
+conditional_lwp = xr.open_dataarray(os.path.join(LOAD_DIR, 'processed_conditional_lwp.nc'))
+water_data['be_lwp'] = conditional_lwp
 
 
 ### Define cloud boundaries ###
