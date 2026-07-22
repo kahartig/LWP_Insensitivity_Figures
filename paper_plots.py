@@ -19,6 +19,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter # for formatting axis ticks
 from matplotlib.patches import Patch # for custom legend patches
+from matplotlib.patches import Rectangle # for drawing rectangles on plot
 from matplotlib.path import Path # for defining polygon patch based on outline
 from matplotlib.patches import PathPatch # for defining polygon patch based on outline
 import matplotlib.style as mstyle
@@ -31,8 +32,8 @@ import cartopy.feature as cfeature
 from cartopy.util import add_cyclic_point
 
 LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_10July'
-APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_10July'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_22July'
+APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_22July'
 master_som_dir = '/Users/kaha4750/Library/CloudStorage/OneDrive-UCB-O365/Documents/Arctic_Clouds_Project/Alaskan_SOM'
 
 # Load datasets
@@ -43,7 +44,7 @@ meteo_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_meteo.nc'))
 ceil_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_ceil.nc'))
 sonde_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_sonde.nc'))
 
-# Replace LWP with conditional hourly average
+# Replace LWP with conditional hourly average ###
 conditional_lwp = xr.open_dataarray(os.path.join(LOAD_DIR, 'processed_conditional_lwp.nc'))
 water_data['be_lwp'] = conditional_lwp
 
@@ -119,14 +120,9 @@ def identify_layer_boundaries(condition_da, nlayers):
 
 
 # Generate masks and fill gaps
-tic = timer.perf_counter()
-
 # Radar-based cloud mask
 cld_valid = ~np.isnan(cloud_data['reflectivity'])
 arscl_mask = fill_height_gaps(cld_valid, 100)
-
-toc = timer.perf_counter()
-print('Time: {:.2f} sec'.format((toc - tic)))
 
 # Define cloud mask
 cld_mask = arscl_mask
@@ -208,7 +204,6 @@ som_node = som_node_idx.reindex_like(cloud_data.time, method='nearest',
 colorblind = dict(zip(['dark blue', 'gold', 'dark green', 'rust', 'dusty pink', 'brown', 'light pink', 'grey', 'yellow', 'light blue'],
                       ['#0173b2', '#de8f05', '#029e73', '#d55e00', '#cc78bc', '#ca9161', '#fbafe4', '#949494', '#ece133', '#56b4e9']))
 COLOR = colorblind
-print(COLOR)
 
 # SOM color cycle
 cmap = plt.cm.Paired
@@ -250,9 +245,9 @@ master_df = master_ds.to_dataframe()
 
 # Define LWP state
 master_df['LWP Category'] = 'Undefined' # initialize
-low_label = r'Thin, <10 g m-2'
-mid_label = r'Semi-transparent, 10$-$40 g m-2'
-high_label = r'Opaque, >40 g m-2'
+low_label = r'Thin, <10 g m$^{-2}$'
+mid_label = r'Semi-transparent, 10$-$40 g m$^{-2}$'
+high_label = r'Opaque, >40 g m$^{-2}$'
 # based on LWP value
 master_df.loc[master_df['LWP'] < 10, 'LWP Category'] = low_label
 master_df.loc[np.logical_and(master_df['LWP'] >= 10, master_df['LWP'] <= 40), 'LWP Category'] = mid_label
@@ -433,17 +428,14 @@ base = 0
 base_withsat = 0
 for idx,left in enumerate(mwr_bounds):
     if idx == 0:
-        annote = r'>{:d} g m-2'.format(left)
+        annote = r'>{:d} g m$^{{-2}}$'.format(left)
         condition = np.logical_and(all_valid, lwp > left)
     else:
         right = mwr_bounds[idx-1]
         annote = '{:d}\nto\n{:d}'.format(left, right)
         condition = np.logical_and.reduce([all_valid, lwp > left, lwp <= right])
     counts = 100 * np.sum(condition) / ntimes
-    # print('Left {} (base {:.2f}): {:.2f} %'.format(left, base, counts))
-    # bars = ax.barh(ypos, counts, barht, left=base, alpha=alpha, **kw[label])
-    bars = ax.barh(ypos, counts, (1-subbarfrac)*barht, left=base, color=cmap(alphas[idx]), **kw[label]) ### ypos, barht
-    # ax.text(base+counts, ypos, annote, va='center', ha='right', color='white')
+    bars = ax.barh(ypos, counts, (1-subbarfrac)*barht, left=base, color=cmap(alphas[idx]), **kw[label])
     ax.bar_label(bars, labels=[annote,], label_type='center')
     base = base + counts
     # repeat for MWR+saturated
@@ -453,7 +445,6 @@ for idx,left in enumerate(mwr_bounds):
         right = mwr_bounds[idx-1]
         condition = np.logical_and.reduce([all_valid, lwp > left, lwp <= right, num_rhw_layers > 0])
     counts = 100 * np.sum(condition) / ntimes
-    # print('  (base {:.2f}): {:.2f} %'.format(base_withsat, counts))
     bars = ax.barh(bar_ticks['MWR with saturated layers'], counts, subbarfrac*barht, left=base_withsat, color=cmap(alphas[idx]), **kw[label])
     base_withsat = base_withsat + counts
 
@@ -463,7 +454,7 @@ ax.grid(which='major', axis='x', zorder=1)
 ax.set_yticks(list(bar_ticks.values()), list(bar_ticks.keys()))
 
 # Save
-save_filename = os.path.join(SAVE_DIR, 'cloud_occurrence.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig01.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -475,7 +466,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 # Calculate adiabatic LWP (Matt's version)
 T_range = (-20, -10)
 tsubset_df = lwp_df[np.logical_and(lwp_df['Temperature'] >= T_range[0], lwp_df['Temperature'] <= T_range[1])]
-print('Number of points in subset: {}'.format(len(tsubset_df)))
+print('Number of points in temperature subset for LWP vs Saturated Depth: {}'.format(len(tsubset_df)))
 sat_layer_base = tsubset_df['First Saturated Base Height'].values
 
 # set characteristic cloud properties
@@ -506,12 +497,12 @@ adiabatic_lwp = (A1_da / A2_da) * (z_da**2) * kg2g
 # Jointplot with three KDEs
 
 tmosaic = 'AAAAA.....;BBBBBCDDDD;BBBBBCDDDD;BBBBBCDDDD;BBBBBCDDDD;BBBBBCDDDD'
-bmosaic = 'A;A;A;A;B'
+bmosaic = 'A'
 
 fig = plt.figure(figsize=(10, 10), layout='constrained')
-top, bottom = fig.subfigures(nrows=2, ncols=1, height_ratios=[1, 0.75])
+top, bottom = fig.subfigures(nrows=2, ncols=1, height_ratios=[1, 0.6])
 top_axd = top.subplot_mosaic(tmosaic)
-bot_axd = bottom.subplot_mosaic(bmosaic)
+bot_ax = bottom.subplots(1,1)
 
 # Jointplot
 ax = top_axd['B']
@@ -535,8 +526,7 @@ sns.kdeplot(data=lwp_df, x='Temperature', y='Sp Humidity', ax=ax,
             levels=lev, **joint_kwargs)
 sns.move_legend(ax, "upper left", bbox_to_anchor=(0, 0.94)) # make room for panel label
 ax.add_artist(extra_legend)
-ax.set(xlabel=r'Temperature ($^{\circ}$C)', ylabel='Specific Humidity (g kg-1)', xlim=xlims, ylim=ylims)
-ax.set_title('(b)', y=1.0, x=0.025, pad=-15, loc='left', bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.set(xlabel=r'Cloud Base Temperature ($^{\circ}$C)', ylabel='Cloud Base Specific Humidity (g kg$^{-1}$)', xlim=xlims, ylim=ylims)
 sns.despine(ax=ax)
 
 # Temperature Marginal
@@ -553,7 +543,6 @@ ax = top_axd['C']
 sns.kdeplot(data=lwp_df, y='Sp Humidity', hue='LWP Category',
             hue_order=lwp_order, palette=lwp_colors, legend=False, ax=ax, **marginal_kwargs)
 ax.set(ylim=ylims, xticks=[], xlabel=None, yticklabels=[], ylabel=None)
-ax.set_title('(c)', y=1.0, x=0.2, pad=-15, loc='left', bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 sns.despine(ax=ax, bottom=True)
 
 # LWP vs SatDepth
@@ -574,15 +563,15 @@ hp = sns.histplot(tsubset_df, x='Saturated Depth', y='LWP', ax=ax,
                   bins=(30, 20), cbar=True, cbar_kws={'label': 'Counts', 'shrink': 0.6})
 hp.fill_between(adiabatic_lwp.sat_depth, adiabatic_lwp[0, :], adiabatic_lwp[1, :], color='grey', alpha=0.7, label='Adiabatic LWP')
 hp.plot(sd_centers, med_lwp, ls='--', color=COLOR['grey'], lw=3, label='Median LWP')
-ax.set(title=r'Spread in LWP for Temperatures -20 to -10$^{\circ}$C', xlabel='Saturated Depth (m)', ylabel='Liquid Water Path (g m-2)',
+ax.set(title=r'Spread in LWP for Temperatures -20 to -10$^{\circ}$C', xlabel='Saturated Depth (m)', ylabel='Liquid Water Path (g m$^{-2}$)',
        xlim=(0, 1000), ylim=(-20, 250))
-ax.text(-0.25, 1.02, '(d)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(-0.25, 1.02, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 for spine in ax.spines.values():
     spine.set(edgecolor='grey', alpha=0.5, lw=2)
 ax.legend()
 
 # LWP occurrence by T bin
-ax = bot_axd['A']
+ax = bot_ax
 # Set up T ranges
 bin_width = 5
 bin_edges = np.arange(-40, 0+1, bin_width)
@@ -612,22 +601,18 @@ for name, count in lwp_counts.items():
     frac_labels = ['{:.0f}%'.format(f) for f in frac]
     ax.bar_label(p, labels=frac_labels, label_type='center', color='black', fontsize=9)
     bottom += frac
+# add counts per bin along top
+for idx in range(len(total_per_bin)):
+    ax.text(mid_bin_pos[idx], 103, '{:.0f}'.format(total_per_bin[idx]), ha='center', color='grey')
+ax.text(-0.5, 103, 'Counts\nper bin', ha='center', color='grey')
 # format
-ax.set_xticks(bin_edges, labels=[])
-ax.set(title='LWP Occurrence in Temperature Bins', ylabel='Percent of T range')
-ax.text(0.01, 1.04, '(e)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.set_xticks(bin_edges)
+ax.set(title='LWP Occurrence in Temperature Bins\n', ylabel='Percent of T range', xlabel=r'Cloud Base Temperature ($^{\circ}$C)')
+ax.text(0.01, 1.04, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 ax.legend()
 
-# Counts per bin
-ax = bot_axd['B']
-ax.bar(mid_bin_pos, total_per_bin, width, color='black', alpha=0.2)
-ax.set_xticks(bin_edges, labels=bin_edges)
-ax.text(0.06, 0.65, 'Counts per bin', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='none', edgecolor='grey'))
-ax.set_title('(f)', y=1.0, x=0.015, pad=-15, loc='left', bbox=dict(facecolor='whitesmoke', edgecolor='white'))
-ax.set(xlabel=r'Cloud Base Temperature ($^{\circ}$C)', ylabel='Counts')
-
 # Save
-save_filename = os.path.join(SAVE_DIR, 'Tq_LWPad_LWPbybin.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig02.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -655,18 +640,17 @@ values_at_percentile = np.nanpercentile(bin_value_da, percentiles)
 # Store values
 da1_in_bin = []
 da2_in_bin = []
+print('Counts per PWV percentile bin:')
 for pbin in percentile_bins:
-    # print(pbin)
     low, high = np.nanpercentile(bin_value_da, pbin)
     in_bin = np.logical_and(bin_value_da > low, bin_value_da < high)
     # first DA
     values = da1[in_bin]
     da1_in_bin.append(values[~np.isnan(values)])
-    # print('  ice: ', np.nanpercentile(values, 90))
     # second DA
     values = da2[in_bin]
     da2_in_bin.append(values[~np.isnan(values)])
-    # print('  liquid: ', np.nanpercentile(values, 50))
+    print('  {}: ice {}, liquid {}'.format(pbin, len(da1_in_bin[-1]), len(da2_in_bin[-1])))
 
 # Plot
 da1_props = {'boxprops': dict(linewidth=2, color=COLOR['light blue']),
@@ -686,18 +670,18 @@ ax.boxplot(da2_in_bin, positions=mid_bin_percent+2, showfliers=False, widths=2,
            whis=(10, 90), label=da2_name, **da2_props)
 # format
 ax.axhline(0, color='grey', lw=1)
-ax.text(102, 0, '0 g m-2', color='grey', va='center')
+ax.text(102, 0, '0 g m$^{-2}$', color='grey', va='center')
 ax.axhline(40, color='grey', lw=1)
-ax.text(102, 40, '40 g m-2', color='grey', va='center')
+ax.text(102, 40, '40 g m$^{-2}$', color='grey', va='center')
 ax.set_xticks(percentiles, labels=percentiles)
-ax.set(title='Cloud Water by PWV Percentile', xlabel='PWV Percentile Bins', ylabel='Water Path (g m-2)',
+ax.set(title='Cloud Water by PWV Percentile', xlabel='PWV Percentile Bins', ylabel='Water Path (g m$^{-2}$)',
       xlim=(0, 100), ylim=(-10, 425))
 highest_iwp_whisker = np.nanpercentile(da1_in_bin[-1], 90)
-ax.text(95-2, 430, r'$\uparrow$ {:.0f} g m-2'.format(highest_iwp_whisker), color='grey', ha='center')
+ax.text(95-2, 430, r'$\uparrow$ {:.0f} g m$^{{-2}}$'.format(highest_iwp_whisker), color='grey', ha='center')
 ax.legend()
 
 # Save
-save_filename = os.path.join(SAVE_DIR, 'PWV_percentiles_cloudwater.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig03.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -848,7 +832,7 @@ for name, condition in wind_cats.items():
 labels = labels + ['Climatology',]
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
-ax.set(title='Liquid Water Path', ylabel='Water Path (g m-2)')
+ax.set(title='Liquid Water Path', ylabel='Water Path (g m$^{-2}$)')
 ax.text(0.01, 1.04, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # IWP (excludes clear sky cases)
@@ -894,7 +878,7 @@ ax.set(title='Ice Water Path')
 ax.text(0.01, 1.04, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # Save
-save_filename = os.path.join(SAVE_DIR, 'wind_conditions.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig04.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -986,16 +970,17 @@ for i in range(nx_node):
         frac_per_bin = [100*counts_dict[i]/np.sum(condition) for i in sorted_keys] # as fraction of values in that node
         iax.bar(theta, counts_per_bin, width=2*np.pi/len(theta),
                 lw=2, edgecolor='black', fill=False, zorder=2)
-        # node frequency
+        # node frequency and count
         nfrac = 100 * np.sum(condition) / len(som_node) # based on NSA data window (2011-2023), not full SOM data (2000-2024)
-        ax.annotate('{:.0f}%'.format(nfrac), xy=(0.96, 0.96), xycoords='axes fraction',
+        ncount = np.sum(condition)
+        ax.annotate('{:.0f}%\nN={:.0f}'.format(nfrac, ncount), xy=(0.96, 0.96), xycoords='axes fraction',
                     ha='right', va='top',
-                    fontsize=12, bbox=dict(boxstyle="square", fc='lightgrey', ec='grey', lw=2))
+                    fontsize=11, bbox=dict(boxstyle="square", fc='lightgrey', ec='grey', lw=2))
         node_idx += 1
 # fig.suptitle('SLP anomaly pattern by SOM node\nand corresponding {:.0f} m wind direction at NSA'.format(z_wind))
 
 # Save
-save_filename = os.path.join(SAVE_DIR, 'SOM_windroses.png')
+save_filename = os.path.join(SAVE_DIR, 'fig05.png')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight', dpi=300)
@@ -1062,7 +1047,7 @@ labs = [l.get_label() for l in lns]
 fig.legend(lns, labs, loc='lower left', bbox_to_anchor=(0.035, -0.09), ncols=2)
 
 # Save
-save_filename = os.path.join(SAVE_DIR, 'SOM_Tq.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig06.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -1196,7 +1181,7 @@ thi.tick_params(axis='y', direction='in', pad=-25, colors=LWP_params.color)
 # other formatting
 # fig.suptitle('Atmo Moisture by SOM node')
 # Save
-save_filename = os.path.join(SAVE_DIR, 'SOM_cloudwater.pdf')
+save_filename = os.path.join(SAVE_DIR, 'fig07.pdf')
 print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
@@ -1210,7 +1195,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 # RH (and median value) at ceilometer first cbh
 # First cbh distribution, ceil vs sonde
 # LWP distribution during clear sky
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'instrument_comparison.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a01.pdf')
 
 fig = plt.figure(figsize=(5, 9), layout='constrained')
 axd = fig.subplot_mosaic('A;B;C')
@@ -1220,8 +1205,9 @@ ax = axd['A']
 RHw_at_ceil = sonde_data['rh'].interp(height=ceil_data['first_cbh'], method='linear')[~clear_sky]
 mean_val = np.nanmean(RHw_at_ceil)
 median_val = np.nanmedian(RHw_at_ceil)
-print('Mean RH_w: {:.2f} %'.format(mean_val))
-print('Median RH_w: {:.2f} %'.format(median_val))
+print('RH at ceilometer first cloud base height:')
+print('  Mean RH_w: {:.2f} %'.format(mean_val))
+print('  Median RH_w: {:.2f} %'.format(median_val))
 _ = ax.hist(RHw_at_ceil, np.arange(0, 115, 5), color=COLOR['grey'], edgecolor='white')
 ax.axvline(mean_val, lw=2, ls='--', color=COLOR['dark blue'], label='Mean')
 ax.axvline(median_val, lw=2, color=COLOR['dark blue'], label='Median')
@@ -1262,7 +1248,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### DownLW vs LWP, mark LWP categories ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'downLW_vs_LWP.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a02.pdf')
 da1 = water_data['be_lwp']
 da2 = rad_data['down_long_hemisp']
 da_color = water_data['be_pwv']
@@ -1285,7 +1271,7 @@ ax.scatter(da1[case], da2[case], color=lwp_colors[high_label])
 t = ax.text(70, 310, 'Opaque', ha='center', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.8, edgecolor=lwp_colors[high_label], lw=2))
 # format
-ax.set(title='Downwelling LW vs LWP in winter at NSA', xlabel='LWP (g m-2)', ylabel='Downwelling LW (W m-2)',
+ax.set(title='Downwelling LW vs LWP in winter at NSA', xlabel='LWP (g m$^{-2}$)', ylabel='Downwelling LW (W m$^{-2}$)',
        xlim=(-22, 100), ylim=(110, 330))
 print('Save to:')
 print('  ', save_filename)
@@ -1294,7 +1280,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Grid of sigdiff for PWV cloud water distributions ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'PWVdist_sigdiff.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a04.pdf')
 p_thresh = 0.05
 
 # Store IWP/LWP distributions by PWV percentile
@@ -1336,7 +1322,8 @@ for label,da_in_bin in binned_da.items():
             else:
                 sigdiff[label][first_idx, second_idx] = 0
 legend_elements = [Patch(facecolor='black', edgecolor='grey', label='Significantly Different'),
-                   Patch(facecolor='white', edgecolor='grey', label='Indistinguishable')]
+                   Patch(facecolor='white', edgecolor='grey', label='Indistinguishable'),
+                   Patch(facecolor='white', edgecolor='grey', hatch='//', label='1-to-1 Line')]
 # grey out symmetric side
 stair_path = []
 for x in np.arange(0, 100, 10):
@@ -1358,6 +1345,12 @@ ax.set_xticks(percentiles, labels=percentiles)
 ax.set_yticks(percentiles, labels=percentiles)
 ax.xaxis.tick_top()
 ax.xaxis.set_label_position('top') 
+# mark 1-1 line
+for i in percentiles[:-1]:
+    ax.add_patch(
+        Rectangle((i, i), percentile_width, percentile_width,
+            facecolor='none', edgecolor='grey', hatch='//', linewidth=0, zorder=3)
+    )
 patch = PathPatch(full_path, facecolor='grey', edgecolor='grey', zorder=10)
 ax.add_patch(patch)
 ax.text(0.02, 1.1, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
@@ -1371,7 +1364,13 @@ ax.set(title='For Liquid Water Path Distributions', xlabel='PWV percentile bin',
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set_yticks(percentiles, labels=percentiles)
 ax.xaxis.tick_top()
-ax.xaxis.set_label_position('top') 
+ax.xaxis.set_label_position('top')
+# mark 1-1 line
+for i in percentiles[:-1]:
+    ax.add_patch(
+        Rectangle((i, i), percentile_width, percentile_width,
+            facecolor='none', edgecolor='grey', hatch='//', linewidth=0, zorder=3)
+    )
 patch = PathPatch(full_path, facecolor='grey', edgecolor='grey', zorder=10)
 ax.add_patch(patch)
 ax.text(0.02, 1.1, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
@@ -1382,8 +1381,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 # plt.show()
 
 
-### LWP vs SatDepth colored by IWP w/i saturated layers ['in T-q jointplot'] ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'LWP_vs_SatDepth_IWPcolor.pdf')
+### LWP vs SatDepth colored by IWP w/i saturated layers
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a03.pdf')
 T_range = (-20, -10)
 tsubset_df = lwp_df[np.logical_and(lwp_df['Temperature'] >= T_range[0], lwp_df['Temperature'] <= T_range[1])]
 
@@ -1427,9 +1426,9 @@ fig, ax = plt.subplots(1, 1, figsize=(6, 4), layout='constrained')
 sc = ax.scatter(tsubset_df['Saturated Depth'], tsubset_df['LWP'], c=color_by, cmap=cm, vmin=0, vmax=50, edgecolor='grey', lw=0.3)
 ax.fill_between(adiabatic_lwp.sat_depth, adiabatic_lwp[0, :], adiabatic_lwp[1, :], color='grey', alpha=0.7, label='Adiabatic LWP')
 ax.set(title='LWP vs Saturated Depth shaded by\nice mass within saturated layer', xlabel='Saturated Depth (m)',
-       ylabel='LWP (g m-2)',
+       ylabel='LWP (g m$^{-2}$)',
        ylim=(-20, 250))
-fig.colorbar(sc, ax=ax, extend='max', label='IWP (g m-2)')
+fig.colorbar(sc, ax=ax, extend='max', label='IWP (g m$^{-2}$)')
 ax.legend()
 print('Save to:')
 print('  ', save_filename)
@@ -1437,7 +1436,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 # plt.show()
 
 ### Total cloud water path and PWV by PWV percentile, LWP vs IWP for 90th percentile ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'TCW_PWV_LWPvsIWP_vsPWVbins.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a05.pdf')
 da1 = water_data['be_pwv']
 da1_name = 'PWV'
 da2 = cloud_data['iwp'] + water_data['be_lwp']
@@ -1462,7 +1461,6 @@ for pbin in percentile_bins:
     # second DA
     values = da2[in_bin]
     da2_in_bin.append(values[~np.isnan(values)])
-    print(pbin, np.nanpercentile(values, 25))
 
 # Plot
 da1_props = {'boxprops': dict(linewidth=2, color=COLOR['dark green']),
@@ -1500,9 +1498,9 @@ ax.text(0.04, 0.93, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(faceco
 # LWP vs IWP
 ax = axd['C']
 da3 = cloud_data['iwp']
-da3_name = 'Ice Water Path (g m-2)'
+da3_name = 'Ice Water Path (g m$^{-2}$)'
 da4 = water_data['be_lwp']
-da4_name = 'Liquid Water Path (g m-2)'
+da4_name = 'Liquid Water Path (g m$^{-2}$)'
 # select bin to use
 pbin = (90, 100)
 low, high = np.nanpercentile(bin_value_da, pbin)
@@ -1525,7 +1523,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Wind direction climatology at 500 m ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'wind_climatology.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a06.pdf')
 z_wind = 500
 da = sonde_data['deg'].sel(height=z_wind, method='nearest')
 
@@ -1561,7 +1559,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 ### By wind direction, all showing the same subset of cases ###
 # Variant: FOR LIQUID-CONTAINING CASES WITH VALID LWP AND NO CLEAR-SKY ONLY
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'wind_conditions_subset.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a07.pdf')
 case = np.logical_and.reduce([num_rhw_layers > 0, ~np.isnan(water_data['be_lwp']), ~clear_sky])
 
 upper_layout = 'AB;CC'
@@ -1606,7 +1604,7 @@ for name, condition in wind_cats.items():
                      np.nanpercentile(state, 75, axis=0), color=wind_colors[name], alpha=0.2)
 for ax in [tl_axd[pos], tr_axd[pos]]:
     ax.plot(da[case].median('time'), da.height*M2KM, color='black', alpha=0.7, ls='--', lw=1.5, zorder=5)
-    ax.set(title='Specific Humidity (g kg-1)', ylim=(0, profile_top*M2KM), xlim=(0, 2))
+    ax.set(title='Specific Humidity (g kg$^{-1}$)', ylim=(0, profile_top*M2KM), xlim=(0, 2))
     ax.set_yticks([])
     ax.set_xticks([0, 0.5, 1, 1.5])
 tl_axd[pos].text(0.05, 0.93, '(b)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
@@ -1683,7 +1681,7 @@ for name, condition in wind_cats.items():
 labels = labels + ['Climatology',]
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
-ax.set(title='Liquid Water Path', ylabel='Water Path (g m-2)')
+ax.set(title='Liquid Water Path', ylabel='Water Path (g m$^{-2}$)')
 ax.text(0.01, 1.04, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # IWP
@@ -1737,7 +1735,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Ice above vs in vs below liquid ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'IWP_aboveinbelow_byPWV.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a09.pdf')
 # case = num_rhw_layers == 1
 case = np.ones(len(sonde_data.time)).astype(bool)
 no_data = num_rhw_layers < 1 # will fill these with NaN at end
@@ -1802,9 +1800,6 @@ for axidx, tup in layer_case.items():
         # third DA
         values = da3[in_bin]
         da3_in_bin.append(values[~np.isnan(values)])
-        # sanity check
-        n = np.sum(in_bin)
-        # print('{}: N={}'.format(pbin, n.item()))
     
     # Plot
     cm = plt.cm.Greys
@@ -1833,7 +1828,7 @@ for axidx, tup in layer_case.items():
     ax.axhline(0, color='grey', lw=1)
     ax.set_xticks(percentiles, labels=percentiles)
     ax.set(title='IWP above, in, and below {} saturated layer'.format(name),
-           xlabel='PWV Percentile Bins', ylabel='Ice Water Path (g m-2)',
+           xlabel='PWV Percentile Bins', ylabel='Ice Water Path (g m$^{-2}$)',
           xlim=(0, 100), ylim=(-10, 425))
 axd['A'].text(0.02, 0.93, '(a)', transform=axd['A'].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 axd['A'].legend(loc='upper left', bbox_to_anchor=(0.02, 0.9))
@@ -1847,7 +1842,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Precip into highest liquid-containing layer ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'precip_into_liquid_byPWV.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a10.pdf')
 offset_list = [30, 130, 230]
 # offset_labels = {0: 'At liquid layer top', 90: '90 m above', 180: '180 m above'}
 offset_labels = {x: '{} m above'.format(x) for x in offset_list}
@@ -1897,16 +1892,12 @@ for offset in offset_list:
         nwithice_in_bin = np.sum(num_with_ice[in_bin])
         frac = 100 * nwithice_in_bin/nlayers_in_bin
         frac_falling_ice.append(frac)
-        # print('{}: {:.2f}% of saturated layers have ice {} m above'.format(pbin, frac, offset))
     frac_by_offset[offset] = frac_falling_ice
 
 fig, ax = plt.subplots(1, 1, figsize=(6, 4))
 cmap = plt.cm.Greys_r
 colors = cmap(np.linspace(0.1, 0.7, len(offset_list)))
 for idx,offset in enumerate(offset_list):
-    if idx == 0:
-        print('{} m: % have ice precip:'.format(offset))
-        print(['{:.2f} %'.format(x) for x in frac_by_offset[offset]])
     ax.scatter(mid_bin_percent, frac_by_offset[offset], color=colors[idx], label=offset_labels[offset])
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set(title='What fraction of HIGHEST saturated layers have hydrometeors directly above?',
@@ -1919,7 +1910,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Conditions during PWV>90th vs climatology ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'PWV90_vs_clim.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a08.pdf')
 case_da = water_data['be_pwv']
 thresh = np.nanpercentile(case_da, 90)
 case = case_da >= thresh
@@ -1935,7 +1926,7 @@ ax.fill_betweenx(da.height*M2KM, np.nanpercentile(da, 25, axis=0), np.nanpercent
 ax.plot(da[case].median('time'), da.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
 ax.fill_betweenx(da.height*M2KM, np.nanpercentile(da[case], 25, axis=0), np.nanpercentile(da[case], 75, axis=0),
                  color=COLOR['dark green'], alpha=0.2, label=r'25$^{th}$ to 75$^{th}$ percentile')
-ax.set(title='Moisture', ylim=(0, 6), ylabel='Height (km)', xlabel='q (g kg-1)')
+ax.set(title='Moisture', ylim=(0, 6), ylabel='Height (km)', xlabel='q (g kg$^{-1}$)')
 ax.legend(loc='upper left')
 ax.text(0.02, 1.03, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
@@ -1977,4 +1968,3 @@ print('Save figure to:')
 print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
 # plt.show()
-
