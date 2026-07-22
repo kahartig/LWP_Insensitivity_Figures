@@ -6,15 +6,7 @@ import numpy as np
 import xarray as xr
 import pandas as pd
 import os
-import datetime
 import time as timer
-
-import matplotlib.pyplot as plt
-import matplotlib as mpl # custom colormaps
-import matplotlib.dates as mdates # format datetime axes
-
-from metpy.calc import dewpoint_from_relative_humidity, equivalent_potential_temperature
-from metpy.units import units
 
 
 # Load data
@@ -54,7 +46,7 @@ for fn in sonde_filenames:
                 ds = ds.drop_duplicates('height', keep='last')
                 ds = ds.sortby('height')
             # add back the launch time
-            ds['time'] = xr.DataArray(sonde_datetime, dims=(), coords=())
+            ds = ds.expand_dims(dim={'time': [sonde_datetime,]}, axis=0)
             # QC checks
             for var in qcvars:
                 qc_var = 'qc_' + var
@@ -69,9 +61,6 @@ for fn in sonde_filenames:
         
 toc = timer.perf_counter()
 print('Time: {} min'.format((toc - tic)/60))
-
-
-# In[23]:
 
 
 # Concat along time and save
