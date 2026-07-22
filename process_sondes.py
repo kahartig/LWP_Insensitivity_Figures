@@ -16,18 +16,18 @@ import matplotlib.dates as mdates # format datetime axes
 from metpy.calc import dewpoint_from_relative_humidity, equivalent_potential_temperature
 from metpy.units import units
 
-# Convert time into height dimension
 
 # Load data
 sonde_dir = '/Users/kaha4750/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/sondes'
 sonde_filenames = np.loadtxt(os.path.join(sonde_dir, 'filenames.txt'), dtype=str)
 sonde_dropvars = ('base_time', 'time_offset', 'dp', 'qc_dp', 'u_wind', 'qc_u_wind',
                  'v_wind', 'qc_v_wind', 'wstat', 'asc', 'qc_asc', 'lat', 'lon')
+msl2agl = -8 # sonde heights are relative to MSL; subtract 8 m to convert to AGL
 
 
 # Loop over all (winter) sonde files
 winter_months = [1, 2, 3, 11, 12]
-common_height = np.arange(8, 15000, step=5)
+common_height = np.arange(0, 15000, step=5)
 qcvars = ['pres', 'tdry', 'rh', 'wspd', 'deg']
 drop_afterqc = ['qc_' + var for var in qcvars] + ['qc_time', 'alt']
 
@@ -47,7 +47,7 @@ for fn in sonde_filenames:
             print('Empty/short {} (max alt {:.2f}); skipping...'.format(fn, ds['alt'].max('time')))
         else:
             # replace 'time' dim with 'height'
-            ds = ds.assign_coords({'height': ds['alt']}).swap_dims({'time': 'height'}).drop_vars('time')
+            ds = ds.assign_coords({'height': ds['alt'] + msl2agl}).swap_dims({'time': 'height'}).drop_vars('time')
             # deal with non-monotonic heights
             is_monotonic = np.all(np.diff(ds.height) > 0)
             if not is_monotonic:
