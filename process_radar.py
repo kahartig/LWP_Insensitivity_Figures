@@ -162,7 +162,8 @@ for save_filename, dstream in fn_to_dstream_map.items():
                 
                 # Resample to hourly
                 qc_ds['reflectivity'] = 10**(qc_ds['reflectivity'] / 10) # convert out of log space, Z=10^{dBZ/10}, before averaging
-                hourly_data = qc_ds.mean('time')
+                hourly_data = qc_ds.fillna(0).mean('time') # instead of skipping no-detection values (cloud-conditional mean), replace with 0 (unconditional mean)
+                hourly_data['reflectivity'] = hourly_data['reflectivity'].where(hourly_data['reflectivity'] != 0, np.nan) # re-introduce NaN if all values before time mean were NaN
                 hourly_data['reflectivity'] = 10 * np.log10(hourly_data['reflectivity']) # convert back to dBZ
                 
                 # Add fraction without NaNs (valid radar return) per hour

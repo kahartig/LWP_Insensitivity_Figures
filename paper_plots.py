@@ -44,10 +44,6 @@ meteo_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_meteo.nc'))
 ceil_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_ceil.nc'))
 sonde_data = xr.open_dataset(os.path.join(LOAD_DIR, 'processed_sonde.nc'))
 
-# Replace LWP with conditional hourly average ###
-conditional_lwp = xr.open_dataarray(os.path.join(LOAD_DIR, 'processed_conditional_lwp.nc'))
-water_data['be_lwp'] = conditional_lwp
-
 
 ### Define cloud boundaries ###
 
