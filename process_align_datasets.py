@@ -282,7 +282,7 @@ sonde_duringsondes['q'] = mpcalc.specific_humidity_from_dewpoint(p * units.hPa, 
 # a varies seasonally from ~0.05 (summer) to ~0.1 (winter) with an annual average of ~0.07
 a_iwc = 0.1
 b_iwc = 0.63
-Z_e = 10**(cloud_duringsondes['reflectivity'] / 10) # convert dBZ to mm^6/m^3
+Z_e = 10**(cloud_duringsondes['unmasked_reflectivity'] / 10) # convert dBZ to mm^6/m^3
 cloud_duringsondes['iwc'] = a_iwc * (Z_e**b_iwc)
 cloud_duringsondes['iwp'] = cloud_duringsondes['iwc'].fillna(0).integrate(coord='height')
 
