@@ -32,8 +32,8 @@ import cartopy.feature as cfeature
 from cartopy.util import add_cyclic_point
 
 LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_22July'
-APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_22July'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_23July'
+APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_23July'
 master_som_dir = '/Users/kaha4750/Library/CloudStorage/OneDrive-UCB-O365/Documents/Arctic_Clouds_Project/Alaskan_SOM'
 
 # Load datasets
@@ -1958,6 +1958,104 @@ this_case = da[case].astype(int)
 ax.plot(this_case.sum('time')/len(this_case.time), this_case.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
 ax.set(title='Cloud Fraction', ylim=(0, 6), xlim=(0, 1), xlabel='Fraction')
 ax.text(0.02, 1.03, '(d)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+
+# Save
+print('Save figure to:')
+print('  ', save_filename)
+plt.savefig(save_filename, bbox_inches='tight')
+# plt.show()
+
+
+### LWP distributions by cloud base temperature bin##
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a11.pdf')
+# Combined LWP by cbT bins
+lwp_props = dict(linewidth=2, color='black')
+lwp_median = dict(linewidth=2, color='black')
+# bins in T value
+bin_width = 5
+cbT_bin_edges = np.arange(-40, 0+bin_width, bin_width)
+mid_bin_value = cbT_bin_edges[:-1] + bin_width/2
+# define datasets
+cb_temperature = lwp_df['Temperature']
+lwp_values = lwp_df['LWP']
+
+# Store values
+da_in_bin = []
+counts_per_bin = []
+for bin_idx in range(len(cbT_bin_edges)-1):
+    bin_left = cbT_bin_edges[bin_idx]
+    bin_right = cbT_bin_edges[bin_idx+1]
+    in_cbT_bin = np.logical_and(cb_temperature >= bin_left, cb_temperature < bin_right)
+    # LWP
+    values = lwp_values[in_cbT_bin]
+    valid_values = values[~np.isnan(values)]
+    da_in_bin.append(valid_values)
+    counts_per_bin.append(len(valid_values))
+
+# Set up sig diff
+p_thresh = 0.05
+sigdiff = 2 * np.ones((len(da_in_bin), len(da_in_bin)))
+for first_idx,first_distr in enumerate(da_in_bin):
+    for second_idx,sec_distr in enumerate(da_in_bin):
+        kstest_da1 = ks_2samp(first_distr, sec_distr, nan_policy='omit')
+        if kstest_da1.pvalue < p_thresh:
+            # significant difference
+            sigdiff[first_idx, second_idx] = 1
+        else:
+            sigdiff[first_idx, second_idx] = 0
+legend_elements = [Patch(facecolor='black', edgecolor='grey', label='Significantly Different'),
+                   Patch(facecolor='white', edgecolor='grey', label='Indistinguishable'),
+                   Patch(facecolor='white', edgecolor='grey', hatch='//', label='1-to-1 Line')]
+# grey out symmetric side
+stair_path = []
+for x in np.arange(cbT_bin_edges[0], cbT_bin_edges[-1] + bin_width, bin_width):
+    stair_path.append([x, x])
+    stair_path.append([x+bin_width, x])
+full_path = Path(stair_path + [[cbT_bin_edges[-1], cbT_bin_edges[0]], [cbT_bin_edges[0], cbT_bin_edges[0]]])
+
+# Plot
+layout = 'AB'
+fig = plt.figure(layout="constrained", figsize=(10, 4))
+axd = fig.subplot_mosaic(layout, width_ratios=(1, 0.75))
+
+# LWP boxplots
+ax = axd['A']
+ax.boxplot(da_in_bin, positions=mid_bin_value, showfliers=False, widths=1,
+           whis=(10, 90), boxprops=lwp_props, medianprops=lwp_median, zorder=3)
+ax.axhline(10, c=sns.color_palette('colorblind')[7], lw=2, zorder=2)
+ax.text(-42, 10, '10', color=sns.color_palette('colorblind')[7])
+ax.axhspan(10, 40, color=sns.color_palette('colorblind')[9], alpha=0.2, zorder=1)
+ax.axhline(40, c=sns.color_palette('colorblind')[0], lw=2, zorder=2)
+ax.text(-42, 40, '40', va='top', color=sns.color_palette('colorblind')[0])
+ax.set(title='LWP by Cloud Base Temperature Bins\n', ylabel='Liquid Water Path (g m$^{-2}$)', xlabel=r'Cloud Base Temperature ($^{\circ}$C)',
+       xlim=(cbT_bin_edges[0], cbT_bin_edges[-1]), ylim=(-10, 260))
+ax.set_xticks(cbT_bin_edges, labels=cbT_bin_edges)
+# add counts per bin above
+for idx in range(len(counts_per_bin)):
+    ax.text(mid_bin_value[idx], 265, '{:.0f}'.format(counts_per_bin[idx]), ha='center', color='grey')
+ax.text(-43, 265, 'Counts\nper bin', ha='center', color='grey')
+
+# Sig Diff matrix
+ax = axd['B']
+# mark 1-1 line
+for i in cbT_bin_edges[:-1]:
+    ax.add_patch(
+        Rectangle((i, i), bin_width, bin_width,
+            facecolor='none', edgecolor='grey', hatch='//', linewidth=0, zorder=3)
+    )
+
+pc = ax.pcolormesh(mid_bin_value, mid_bin_value, np.tril(sigdiff), shading='nearest', cmap='Greys', zorder=2)
+for edge in cbT_bin_edges:
+    ax.axhline(edge, color='grey')
+    ax.axvline(edge, color='grey')
+ax.set(title='Significant differences between LWP distributions\namong bins of cloud base temperature', xlabel='Cloud base temperature bin', ylabel='Cloud base temperature bin')
+ax.set_xticks(cbT_bin_edges, labels=cbT_bin_edges)
+ax.set_yticks(cbT_bin_edges, labels=cbT_bin_edges)
+ax.xaxis.tick_top()
+ax.xaxis.set_label_position('top') 
+patch = PathPatch(full_path, facecolor='grey', edgecolor='grey', zorder=5)
+ax.add_patch(patch)
+ax.legend(handles=legend_elements, bbox_to_anchor=(0.42, 0.03))
 
 # Save
 print('Save figure to:')
