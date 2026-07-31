@@ -32,8 +32,8 @@ import cartopy.feature as cfeature
 from cartopy.util import add_cyclic_point
 
 LOAD_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/Arctic_Clouds_Project/ARM_NSA_Data/categorization_2011-2023/processed_datasets'
-SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_23July'
-APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Reprocess_23July'
+SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Figures'
+APPENDIX_SAVE_DIR = '/Users/kaha4750/OneDrive - UCB-O365/Documents/My Papers/LWP Insensitive to Meteo Winter2025/Supplemental_Figures'
 master_som_dir = '/Users/kaha4750/Library/CloudStorage/OneDrive-UCB-O365/Documents/Arctic_Clouds_Project/Alaskan_SOM'
 
 # Load datasets
@@ -241,7 +241,7 @@ master_df = master_ds.to_dataframe()
 
 # Define LWP state
 master_df['LWP Category'] = 'Undefined' # initialize
-low_label = r'Thin, <10 g m$^{-2}$'
+low_label = r'Indeterminate, <10 g m$^{-2}$'
 mid_label = r'Semi-transparent, 10$-$40 g m$^{-2}$'
 high_label = r'Opaque, >40 g m$^{-2}$'
 # based on LWP value
@@ -281,10 +281,10 @@ northerly_wind = np.logical_or(winddir_fixed_z > 360-45, winddir_fixed_z < 45).v
 easterly_wind = np.logical_and(winddir_fixed_z > 90-45, winddir_fixed_z < 90+45).values
 southerly_wind = np.logical_and(winddir_fixed_z > 180-45, winddir_fixed_z < 180+45).values
 westerly_wind = np.logical_and(winddir_fixed_z > 270-45, winddir_fixed_z < 270+45).values
-wind_cats = {'Northerly': northerly_wind, 'Easterly': easterly_wind,
-             'Southerly': southerly_wind, 'Westerly': westerly_wind}
-wind_colors = {'Northerly': COLOR['dark blue'], 'Easterly': COLOR['dusty pink'],
-               'Southerly': COLOR['dark green'], 'Westerly': COLOR['gold']}
+wind_cats = {'Southward': northerly_wind, 'Westward': easterly_wind,
+             'Northward': southerly_wind, 'Eastward': westerly_wind}
+wind_colors = {'Southward': COLOR['dark blue'], 'Westward': COLOR['dusty pink'],
+               'Northward': COLOR['dark green'], 'Eastward': COLOR['gold']}
 
 ####################
 ### Main Figures ###
@@ -515,7 +515,7 @@ xlims = (-45, 5)
 ylims = (-0.25, 3.5)
 lev = [0.1, 0.4, 0.7] # originally lev=4
 ax.plot(t, qsat, ls='--', c='black', label='100% RH')
-ax.axvspan(T_range[0], T_range[1], color='grey', alpha=0.1, label='Panel (d) range')
+ax.axvspan(T_range[0], T_range[1], color='grey', alpha=0.1, label='Panel (b) range')
 extra_legend = ax.legend(loc='upper left', bbox_to_anchor=(0, 0.7))
 sns.kdeplot(data=lwp_df, x='Temperature', y='Sp Humidity', ax=ax,
             hue='LWP Category', hue_order=lwp_order, palette=lwp_colors,
@@ -660,20 +660,20 @@ da2_props = {'boxprops': dict(linewidth=2, color=COLOR['dark blue']),
 fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 # IWP
 ax.boxplot(da1_in_bin, positions=mid_bin_percent-2, showfliers=False, widths=2,
-           whis=(10, 90), label=da1_name, **da1_props)
+           whis=(10, 90), label=da1_name, zorder=2, **da1_props)
 # LWP
 ax.boxplot(da2_in_bin, positions=mid_bin_percent+2, showfliers=False, widths=2,
-           whis=(10, 90), label=da2_name, **da2_props)
+           whis=(10, 90), label=da2_name, zorder=2, **da2_props)
 # format
-ax.axhline(0, color='grey', lw=1)
-ax.text(102, 0, '0 g m$^{-2}$', color='grey', va='center')
-ax.axhline(40, color='grey', lw=1)
+ax.axhline(10, color='grey', lw=1, zorder=1)
+ax.text(102, 10, '10 g m$^{-2}$', color='grey', va='center')
+ax.axhline(40, color='grey', lw=1, zorder=1)
 ax.text(102, 40, '40 g m$^{-2}$', color='grey', va='center')
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set(title='Cloud Water by PWV Percentile', xlabel='PWV Percentile Bins', ylabel='Water Path (g m$^{-2}$)',
-      xlim=(0, 100), ylim=(-10, 425))
+      xlim=(0, 100), ylim=(-10, 650))
 highest_iwp_whisker = np.nanpercentile(da1_in_bin[-1], 90)
-ax.text(95-2, 430, r'$\uparrow$ {:.0f} g m$^{{-2}}$'.format(highest_iwp_whisker), color='grey', ha='center')
+ax.text(95-2, 655, r'$\uparrow$ {:.0f} g m$^{{-2}}$'.format(highest_iwp_whisker), color='grey', ha='center')
 ax.legend()
 
 # Save
@@ -698,7 +698,7 @@ top_left, top_right = top.subfigures(nrows=1, ncols=2)
 tl_axd = top_left.subplot_mosaic(upper_layout)
 tr_axd = top_right.subplot_mosaic(upper_layout)
 bot_axd = bottom.subplot_mosaic(lower_layout)
-sf_map = {'Easterly': tl_axd, 'Westerly': tl_axd, 'Northerly': tr_axd, 'Southerly': tr_axd}
+sf_map = {'Westward': tl_axd, 'Eastward': tl_axd, 'Southward': tr_axd, 'Northward': tr_axd}
 
 # Temperature
 pos = 'A'
@@ -706,16 +706,16 @@ da = sonde_data['tdry'].sel(height=slice(0, profile_top))
 for name, condition in wind_cats.items():
     state = da[condition]
     ax = sf_map[name][pos]
-    ax.plot(state.median('time'), state.height*M2KM, color=wind_colors[name], lw=3, label=name)
+    ax.plot(state.median('time'), state.height*M2KM, color=wind_colors[name], lw=3, label=name, zorder=4)
     ax.fill_betweenx(state.height*M2KM, np.nanpercentile(state, 25, axis=0),
-                     np.nanpercentile(state, 75, axis=0), color=wind_colors[name], alpha=0.2)
+                     np.nanpercentile(state, 75, axis=0), color=wind_colors[name], alpha=0.2, zorder=3)
+tl_axd[pos].text(0.05, 0.94, '(a)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
+tr_axd[pos].text(0.05, 0.94, '(c)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
 for ax in [tl_axd[pos], tr_axd[pos]]:
-    ax.plot(da.median('time'), da.height*M2KM, color='black', alpha=0.7, ls='--', lw=1.5, zorder=5, label='Climatology')
+    ax.plot(da.median('time'), da.height*M2KM, color='black', alpha=0.7, ls='--', lw=1.5, zorder=4, label='2011-2023\nwinter median')
     ax.set(title=r'Temperature ($^\circ$C)', ylabel='Height (km)', ylim=(0, profile_top*M2KM), xlim=(-45, 0))
     ax.set_xticks([-40, -30, -20, -10, 0])
-    ax.legend()
-tl_axd[pos].text(0.05, 0.93, '(a)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
-tr_axd[pos].text(0.05, 0.93, '(c)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
+    ax.legend(bbox_to_anchor=[0.01, 0.93], loc='upper left')
 
 
 # Sp Humidity
@@ -732,8 +732,8 @@ for ax in [tl_axd[pos], tr_axd[pos]]:
     ax.set(title='Specific Humidity (g kg-1)', ylim=(0, profile_top*M2KM), xlim=(0, 2))
     ax.set_yticks([])
     ax.set_xticks([0, 0.5, 1, 1.5])
-tl_axd[pos].text(0.05, 0.93, '(b)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
-tr_axd[pos].text(0.05, 0.93, '(d)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
+tl_axd[pos].text(0.05, 0.94, '(b)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
+tr_axd[pos].text(0.05, 0.94, '(d)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
 
 
 # Cloud fraction
@@ -766,7 +766,7 @@ for ax in [tl_axd[pos], tr_axd[pos]]:
             ls='-', lw=1, zorder=5)
 frac_noliq['Climatology'] = (np.sum(num_rhw_layers == 0) / len(sonde_data.time)).item()
 # Text box for % clear/liquid
-txt_xpos = {'Climatology': 0.5, 'Easterly': 0.6, 'Westerly': 0.7, 'Northerly': 0.6, 'Southerly': 0.7}
+txt_xpos = {'Climatology': 0.5, 'Westward': 0.6, 'Eastward': 0.7, 'Southward': 0.6, 'Northward': 0.7}
 for ax in [tl_axd[pos], tr_axd[pos]]:
     name = 'Climatology'
     txt = ax.text(0.5, 3, 'Clear sky (radar):')
@@ -785,14 +785,13 @@ for name in wind_cats.keys():
 for ax in [tl_axd[pos], tr_axd[pos]]:
     ax.set(title='Cloud Fraction', xlim=(0, 1), ylabel='Height (km)', ylim=(0, profile_top*M2KM))
     ax.legend(loc='upper right')
-tl_axd[pos].text(0.01, 1.03, '(e)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
-tr_axd[pos].text(0.01, 1.03, '(f)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+tl_axd[pos].text(0.01, 1.04, '(e)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+tr_axd[pos].text(0.01, 1.04, '(f)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # LWP (excludes clear sky cases)
 ax = bot_axd['E']
 da = water_data['be_lwp']
 pos = [5, 10, 15, 20, 25]
-labels = ['Northerly', '\nEasterly', 'Southerly', '\nWesterly', 'Climatology']
 # for climatology
 idx = -1
 prop = {'boxprops': dict(linewidth=1.5, color='black', alpha=0.7, linestyle='--'),
@@ -825,11 +824,14 @@ for name, condition in wind_cats.items():
                whis=(10, 90), zorder=2, **prop)
     idx = idx + 1
 # formatting
-labels = labels + ['Climatology',]
+labels = labels + ['2011-2023\nwinters',]
+# stagger every other label
+labels[1] = '\n'+labels[1]
+labels[3] = '\n'+labels[3]
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
 ax.set(title='Liquid Water Path', ylabel='Water Path (g m$^{-2}$)')
-ax.text(0.01, 1.04, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.01, 1.05, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # IWP (excludes clear sky cases)
 ax = bot_axd['F']
@@ -867,11 +869,14 @@ for name, condition in wind_cats.items():
                whis=(10, 90), zorder=2, **prop)
     idx = idx + 1
 # formatting
-labels = labels + ['Climatology',]
+labels = labels + ['2011-2023\nwinters',]
+# stagger every other label
+labels[1] = '\n'+labels[1]
+labels[3] = '\n'+labels[3]
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
 ax.set(title='Ice Water Path')
-ax.text(0.01, 1.04, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.01, 1.05, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # Save
 save_filename = os.path.join(SAVE_DIR, 'fig04.pdf')
@@ -1009,7 +1014,7 @@ for i in range(nx_node):
         # Temperature
         c = COLOR['gold']
         state = da_T[condition]
-        ln1 = ax.plot(state.median('time'), state.height*M2KM, color=c, lw=3, label='Temperature')
+        ln1 = ax.plot(state.median('time'), state.height*M2KM, color=c, lw=3, label='Temperature,\nmedian')
         ln2 = ax.fill_betweenx(state.height*M2KM, np.nanpercentile(state, 25, axis=0),
                                np.nanpercentile(state, 75, axis=0), color=COLOR['gold'], alpha=0.2,
                                label='25$^{th}$ to 75$^{th}$\npercentile')
@@ -1022,7 +1027,7 @@ for i in range(nx_node):
         c = COLOR['dark blue']
         ax2 = ax.twiny()
         state = da_q[condition]
-        ln3 = ax2.plot(state.median('time'), state.height*M2KM, color=c, lw=3, label='Specific Humidity')
+        ln3 = ax2.plot(state.median('time'), state.height*M2KM, color=c, lw=3, label='Specific Humidity,\nmedian')
         ln4 = ax2.fill_betweenx(state.height*M2KM, np.nanpercentile(state, 25, axis=0),
                                 np.nanpercentile(state, 75, axis=0), color=COLOR['dark blue'], alpha=0.2,
                                label='25$^{th}$ to 75$^{th}$\npercentile')
@@ -1034,13 +1039,13 @@ for i in range(nx_node):
         ax2.xaxis.label.set_color(c)
         ax2.tick_params(axis='x', colors=c)
 axs[1, 0].set(ylabel='Height (km)')
-fig.text(0.5, -0.02, 'Specific Humidity (g kg-1)', color=COLOR['dark blue'], ha='center', fontsize=12)
+fig.text(0.5, -0.02, 'Specific Humidity (g kg$^{-1}$)', color=COLOR['dark blue'], ha='center', fontsize=12)
 fig.text(0.5, -0.05, r'Temperature ($^{\circ}$C)', color=COLOR['gold'], ha='center', fontsize=12)
 # fig.suptitle('Temperature and Specific Humidity Anomalies\nby SOM node', fontsize=18)
 # combined legend
 lns = ln1 + [ln2,] + ln3 + [ln4,]
 labs = [l.get_label() for l in lns]
-fig.legend(lns, labs, loc='lower left', bbox_to_anchor=(0.035, -0.09), ncols=2)
+fig.legend(lns, labs, loc='lower left', bbox_to_anchor=(0.035, -0.09), ncols=2, fontsize=9)
 
 # Save
 save_filename = os.path.join(SAVE_DIR, 'fig06.pdf')
@@ -1063,8 +1068,8 @@ class CloudWaterSOM:
 
 
 # Box and whisker, LWP and IWP and PWV
-LWP_params = CloudWaterSOM(water_data['be_lwp'], COLOR['dark blue'], 'LWP', 'g m-2', (0, 160), 'A')
-IWP_params = CloudWaterSOM(cloud_data['iwp'], COLOR['light blue'], 'IWP', 'g m-2', (0, 800), 'B')
+LWP_params = CloudWaterSOM(water_data['be_lwp'], COLOR['dark blue'], 'LWP', 'g m$^{-2}$', (0, 160), 'A')
+IWP_params = CloudWaterSOM(cloud_data['iwp'], COLOR['light blue'], 'IWP', 'g m$^{-2}$', (0, 1200), 'B')
 PWV_params = CloudWaterSOM(water_data['be_pwv'], COLOR['dark green'], 'PWV', 'cm', (0, 1.2), 'C')
 nintervals = 4
 
@@ -1133,7 +1138,7 @@ for i in range(nx_node):
                         Line2D([0], [0], color=IWP_params.color, lw=3),
                         Line2D([0], [0], color=PWV_params.color, lw=3),
                         Line2D([0], [0], color='black', lw=1)]
-        axs[1, 0].legend(custom_lines, ['LWP', 'IWP', 'PWV', 'Climatology'], loc='center right', fontsize=14)#, loc=(0.05, 0.68))
+        axs[1, 0].legend(custom_lines, ['LWP', 'IWP', 'PWV', '2011-2023 winters'], loc='center right', fontsize=14)#, loc=(0.05, 0.68))
         # shade semi-transparent for LWP
         axd['A'].axhspan(0, 40, color='black', alpha=0.07)
         # add panel label
@@ -1187,7 +1192,9 @@ plt.savefig(save_filename, bbox_inches='tight')
 ### Supplemental Figures ###
 ############################
 
+
 ### Instrument inter-comparison ###
+
 # RH (and median value) at ceilometer first cbh
 # First cbh distribution, ceil vs sonde
 # LWP distribution during clear sky
@@ -1214,7 +1221,6 @@ ax.text(median_val+3, 1100, '{:.0f}%'.format(median_val), ha='left', color=COLOR
 ax.set(xlabel='RH_w (%)', ylabel='Counts', title='RH$_{water}$ when at first ceilometer cloud base')
 ax.text(0.02, 0.9, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
-
 # Ceil vs sonde first cbh
 ax = axd['B']
 da1 = ceil_data['first_cbh']*M2KM
@@ -1233,8 +1239,10 @@ ax = axd['C']
 da = water_data['be_lwp'][clear_sky]
 _ = ax.hist(da, np.arange(-25, 25, 2), color=COLOR['grey'], edgecolor='white', zorder=2)
 ax.grid(True, which='major', axis='x', zorder=1)
-ax.set(xlabel='Liquid Water Path (g/m2)', ylabel='Counts', title='LWP during clear sky conditions', xlim=(-25, 25))
+ax.set(xlabel='Liquid Water Path (g m$^{-2}$)', ylabel='Counts', title='LWP during clear sky conditions', xlim=(-25, 25))
 ax.text(0.02, 0.9, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+print('LWP during clear sky:')
+print('  mean {:.2f}, st dev {:.2f}'.format(da.mean('time'), da.std('time')))
 
 # Save
 print('Save figure to:')
@@ -1244,6 +1252,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### DownLW vs LWP, mark LWP categories ###
+
 save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a02.pdf')
 da1 = water_data['be_lwp']
 da2 = rad_data['down_long_hemisp']
@@ -1254,12 +1263,12 @@ fig, ax = plt.subplots(1, 1)
 # Thin
 case = np.logical_and.reduce([all_valid, da1 < 10])
 ax.scatter(da1[case], da2[case], color=lwp_colors[low_label])
-t = ax.text(-7, 310, 'Thin', ha='center', fontsize=12)
+t = ax.text(-7, 310, 'Indeterminate', ha='center', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.8, edgecolor=lwp_colors[low_label], lw=2))
 # Semi-transparent
 case = np.logical_and.reduce([all_valid, da1 >= 10, da1 <= 40])
 ax.scatter(da1[case], da2[case], color=lwp_colors[mid_label])
-t = ax.text(25, 310, 'Semi-transparent', ha='center', fontsize=12)
+t = ax.text(25, 290, 'Semi-transparent', ha='center', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.8, edgecolor=lwp_colors[mid_label], lw=2))
 # Opaque
 case = np.logical_and.reduce([all_valid, da1 > 40])
@@ -1276,7 +1285,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Grid of sigdiff for PWV cloud water distributions ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a04.pdf')
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a05.pdf')
 p_thresh = 0.05
 
 # Store IWP/LWP distributions by PWV percentile
@@ -1328,8 +1338,8 @@ for x in np.arange(0, 100, 10):
 full_path = Path(stair_path + [[100, 0], [0, 0]])
 
 fig, axs = plt.subplots(1, 2, figsize=(10, 5), layout='constrained')
-fig.suptitle('Significant differences between cloud water distributions\namong 10-percentile PWV bins', y=1.1)
-fig.legend(handles=legend_elements)
+fig.suptitle('Significant differences between cloud water distributions\namong 10-percentile PWV bins', y=1.15)
+fig.legend(handles=legend_elements, fontsize=11)
 
 ax = axs[0]
 pc = ax.pcolormesh(mid_bin_percent, mid_bin_percent, np.tril(sigdiff['IWP']), shading='nearest', cmap='Greys')
@@ -1378,7 +1388,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### LWP vs SatDepth colored by IWP w/i saturated layers
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a03.pdf')
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a04.pdf')
 T_range = (-20, -10)
 tsubset_df = lwp_df[np.logical_and(lwp_df['Temperature'] >= T_range[0], lwp_df['Temperature'] <= T_range[1])]
 
@@ -1431,8 +1442,9 @@ print('  ', save_filename)
 plt.savefig(save_filename, bbox_inches='tight')
 # plt.show()
 
+
 ### Total cloud water path and PWV by PWV percentile, LWP vs IWP for 90th percentile ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a05.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a06.pdf')
 da1 = water_data['be_pwv']
 da1_name = 'PWV'
 da2 = cloud_data['iwp'] + water_data['be_lwp']
@@ -1480,7 +1492,7 @@ ax.axhline(0, color='grey', lw=1)
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set(title='PWV\nby PWV Percentile', xlabel='PWV Percentile Bins', ylabel='Precipitable Water Vapor (cm)',
       xlim=(0, 100), ylim=(0, 1.5))
-ax.text(0.04, 0.93, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.04, 0.92, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 # TWP
 ax = axd['B']
 ax.boxplot(da2_in_bin, positions=mid_bin_percent, showfliers=False, widths=4,
@@ -1490,7 +1502,7 @@ ax.axhline(0, color='grey', lw=1)
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set(title='Total Cloud Water\nby PWV Percentile', xlabel='PWV Percentile Bins', ylabel='Cloud Water Path (g/m2)',
       xlim=(0, 100), ylim=(-10, 1000))
-ax.text(0.04, 0.93, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.04, 0.92, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 # LWP vs IWP
 ax = axd['C']
 da3 = cloud_data['iwp']
@@ -1510,7 +1522,7 @@ da4_values = values[~np.isnan(values)]
 ax.scatter(da3_values, da4_values, color=COLOR['grey'])
 ax.set(title='LWP vs IWP\nabove {}th percentile of PWV'.format(pbin[0]), xlabel=da3_name, ylabel=da4_name,
        xlim=(-50, 2500), ylim=(-20, 300))
-ax.text(0.04, 0.93, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white', alpha=0.9))
+ax.text(0.04, 0.92, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white', alpha=0.9))
 
 print('Save to:')
 print('  ', save_filename)
@@ -1519,7 +1531,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Wind direction climatology at 500 m ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a06.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a07.pdf')
 z_wind = 500
 da = sonde_data['deg'].sel(height=z_wind, method='nearest')
 
@@ -1527,24 +1539,24 @@ fig, ax = plt.subplots(1, 1, figsize=(7, 4))
 b = np.arange(0, 361, 15)
 _ = ax.hist(da, b, zorder=2, color='grey', alpha=0.7)
 # colored bands for each direction
-ax.axvspan(0, 45, color=wind_colors['Northerly'], alpha=0.4, zorder=1)
-ax.axvspan(360-45, 360, color=wind_colors['Northerly'], alpha=0.4, zorder=1)
-ax.axvspan(90-45, 90+45, color=wind_colors['Easterly'], alpha=0.4, zorder=1)
-ax.axvspan(180-45, 180+45, color=wind_colors['Southerly'], alpha=0.4, zorder=1)
-ax.axvspan(270-45, 270+45, color=wind_colors['Westerly'], alpha=0.4, zorder=1)
+ax.axvspan(0, 45, color=wind_colors['Southward'], alpha=0.4, zorder=1)
+ax.axvspan(360-45, 360, color=wind_colors['Southward'], alpha=0.4, zorder=1)
+ax.axvspan(90-45, 90+45, color=wind_colors['Westward'], alpha=0.4, zorder=1)
+ax.axvspan(180-45, 180+45, color=wind_colors['Northward'], alpha=0.4, zorder=1)
+ax.axvspan(270-45, 270+45, color=wind_colors['Eastward'], alpha=0.4, zorder=1)
 
-t = ax.text(45/2, 400, 'North-\nerlies', ha='center', va='top', fontsize=12)
+t = ax.text(45/2, 400, 'South-\nward', ha='center', va='top', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-t = ax.text(90, 400, 'Easterlies', ha='center', va='top', fontsize=12)
+t = ax.text(90, 400, 'Westward', ha='center', va='top', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-t = ax.text(180, 400, 'Southerlies', ha='center', va='top', fontsize=12)
+t = ax.text(180, 400, 'Northward', ha='center', va='top', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-t = ax.text(270, 400, 'Westerlies', ha='center', va='top', fontsize=12)
+t = ax.text(270, 400, 'Eastward', ha='center', va='top', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
-t = ax.text(360-(45/2), 400, 'North-\nerlies', ha='center', va='top', fontsize=12)
+t = ax.text(360-(45/2), 400, 'South-\nward', ha='center', va='top', fontsize=12)
 t.set_bbox(dict(facecolor='white', alpha=0.7, edgecolor='white'))
 
-ax.set(title='NSA wind direction climatology at {} m'.format(z_wind), xlabel='Direction (degrees)', ylabel='Counts',
+ax.set(title='NSA wintertime wind direction at {} m'.format(z_wind), xlabel='Direction (degrees)', ylabel='Counts',
        xlim=(0, 360))
 # Save
 print('Save figure to:')
@@ -1555,7 +1567,7 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 ### By wind direction, all showing the same subset of cases ###
 # Variant: FOR LIQUID-CONTAINING CASES WITH VALID LWP AND NO CLEAR-SKY ONLY
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a07.pdf')
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a08.pdf')
 case = np.logical_and.reduce([num_rhw_layers > 0, ~np.isnan(water_data['be_lwp']), ~clear_sky])
 
 upper_layout = 'AB;CC'
@@ -1569,7 +1581,7 @@ top_left, top_right = top.subfigures(nrows=1, ncols=2)
 tl_axd = top_left.subplot_mosaic(upper_layout)
 tr_axd = top_right.subplot_mosaic(upper_layout)
 bot_axd = bottom.subplot_mosaic(lower_layout)
-sf_map = {'Easterly': tl_axd, 'Westerly': tl_axd, 'Northerly': tr_axd, 'Southerly': tr_axd}
+sf_map = {'Westward': tl_axd, 'Eastward': tl_axd, 'Southward': tr_axd, 'Northward': tr_axd}
 
 # Temperature
 pos = 'A'
@@ -1581,10 +1593,10 @@ for name, condition in wind_cats.items():
     ax.fill_betweenx(state.height*M2KM, np.nanpercentile(state, 25, axis=0),
                      np.nanpercentile(state, 75, axis=0), color=wind_colors[name], alpha=0.2)
 for ax in [tl_axd[pos], tr_axd[pos]]:
-    ax.plot(da[case].median('time'), da.height*M2KM, color='black', alpha=0.7, ls='--', lw=1.5, zorder=5, label='Climatology')
+    ax.plot(da[case].median('time'), da.height*M2KM, color='black', alpha=0.7, ls='--', lw=1.5, zorder=5, label='2011-2023\nwinter median')
     ax.set(title=r'Temperature ($^\circ$C)', ylabel='Height (km)', ylim=(0, profile_top*M2KM), xlim=(-45, 0))
     ax.set_xticks([-40, -30, -20, -10, 0])
-    ax.legend()
+    ax.legend(bbox_to_anchor=[0.01, 0.92], loc='upper left')
 tl_axd[pos].text(0.05, 0.93, '(a)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
 tr_axd[pos].text(0.05, 0.93, '(c)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'), zorder=5)
 
@@ -1634,14 +1646,14 @@ for ax in [tl_axd[pos], tr_axd[pos]]:
 for ax in [tl_axd[pos], tr_axd[pos]]:
     ax.set(title='Cloud Fraction', xlim=(0, 1), ylabel='Height (km)', ylim=(0, profile_top*M2KM))
     ax.legend(loc='upper right')
-tl_axd[pos].text(0.01, 1.03, '(e)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
-tr_axd[pos].text(0.01, 1.03, '(f)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+tl_axd[pos].text(0.01, 1.04, '(e)', transform=tl_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+tr_axd[pos].text(0.01, 1.04, '(f)', transform=tr_axd[pos].transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # LWP
 ax = bot_axd['E']
 da = water_data['be_lwp']
 pos = [5, 10, 15, 20, 25]
-labels = ['Northerly', '\nEasterly', 'Southerly', '\nWesterly', 'Climatology']
+labels = ['Southward', '\nWestward', 'Northward', '\nEastward', '2011-2023 winter mean']
 # for climatology
 idx = -1
 prop = {'boxprops': dict(linewidth=1.5, color='black', alpha=0.7, linestyle='--'),
@@ -1674,11 +1686,14 @@ for name, condition in wind_cats.items():
                whis=(10, 90), zorder=2, **prop)
     idx = idx + 1
 # formatting
-labels = labels + ['Climatology',]
+labels = labels + ['2011-2023\nwinters',]
+# stagger every other label
+labels[1] = '\n'+labels[1]
+labels[3] = '\n'+labels[3]
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
 ax.set(title='Liquid Water Path', ylabel='Water Path (g m$^{-2}$)')
-ax.text(0.01, 1.04, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.01, 1.06, '(g)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # IWP
 ax = bot_axd['F']
@@ -1716,12 +1731,15 @@ for name, condition in wind_cats.items():
                whis=(10, 90), zorder=2, **prop)
     idx = idx + 1
 # formatting
-labels = labels + ['Climatology',]
+labels = labels + ['2011-2023\nwinters',]
+# stagger every other label
+labels[1] = '\n'+labels[1]
+labels[3] = '\n'+labels[3]
 fig.suptitle('Subset of Liquid-Containing Cases:\nat least one saturated layer, LWP is not NaN, no clear-sky')
 ax.set_xticks(pos, labels=labels)
 ax.axhline(0, color='grey', lw=1, zorder=1)
 ax.set(title='Ice Water Path')
-ax.text(0.01, 1.04, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0.01, 1.06, '(h)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # Save
 print('Save figure to:')
@@ -1731,7 +1749,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Ice above vs in vs below liquid ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a09.pdf')
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a10.pdf')
 # case = num_rhw_layers == 1
 case = np.ones(len(sonde_data.time)).astype(bool)
 no_data = num_rhw_layers < 1 # will fill these with NaN at end
@@ -1838,7 +1857,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Precip into highest liquid-containing layer ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a10.pdf')
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a11.pdf')
 offset_list = [30, 130, 230]
 # offset_labels = {0: 'At liquid layer top', 90: '90 m above', 180: '180 m above'}
 offset_labels = {x: '{} m above'.format(x) for x in offset_list}
@@ -1894,6 +1914,9 @@ fig, ax = plt.subplots(1, 1, figsize=(6, 4))
 cmap = plt.cm.Greys_r
 colors = cmap(np.linspace(0.1, 0.7, len(offset_list)))
 for idx,offset in enumerate(offset_list):
+    if idx == 0:
+        print('{} m: % have ice precip:'.format(offset))
+        print(['{:.2f} %'.format(x) for x in frac_by_offset[offset]])
     ax.scatter(mid_bin_percent, frac_by_offset[offset], color=colors[idx], label=offset_labels[offset])
 ax.set_xticks(percentiles, labels=percentiles)
 ax.set(title='What fraction of HIGHEST saturated layers have hydrometeors directly above?',
@@ -1906,7 +1929,8 @@ plt.savefig(save_filename, bbox_inches='tight')
 
 
 ### Conditions during PWV>90th vs climatology ###
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a08.pdf')
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a09.pdf')
 case_da = water_data['be_pwv']
 thresh = np.nanpercentile(case_da, 90)
 case = case_da >= thresh
@@ -1916,7 +1940,7 @@ axd = fig.subplot_mosaic('ABCD', sharey=True)
 # Moisture
 da = sonde_data['q'].sel(height=slice(0, 6000)) * 1000 # in g/kg
 ax = axd['A']
-ax.plot(da.median('time'), da.height*M2KM, color='black', ls='--', lw=2, label='Climatology')
+ax.plot(da.median('time'), da.height*M2KM, color='black', ls='--', lw=2, label='2011-2023 winter median')
 ax.fill_betweenx(da.height*M2KM, np.nanpercentile(da, 25, axis=0), np.nanpercentile(da, 75, axis=0),
                  color='black', alpha=0.2, label=r'25$^{th}$ to 75$^{th}$ percentile')
 ax.plot(da[case].median('time'), da.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
@@ -1929,31 +1953,31 @@ ax.text(0.02, 1.03, '(a)', transform=ax.transAxes, fontsize=12, bbox=dict(faceco
 # RH
 da = sonde_data['rh'].sel(height=slice(0, 6000))
 ax = axd['B']
-ax.plot(da.median('time'), da.height*M2KM, color='black', ls='--', lw=2, label='Climatology')
+ax.plot(da.median('time'), da.height*M2KM, color='black', ls='--', lw=2, label='2011-2023 winter median')
 ax.fill_betweenx(da.height*M2KM, np.nanpercentile(da, 25, axis=0), np.nanpercentile(da, 75, axis=0),
                  color='black', alpha=0.2, label=r'25$^{th}$ to 75$^{th}$ percentile')
 ax.plot(da[case].median('time'), da.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
 ax.fill_betweenx(da.height*M2KM, np.nanpercentile(da[case], 25, axis=0), np.nanpercentile(da[case], 75, axis=0),
                  color=COLOR['dark green'], alpha=0.2, label=r'25$^{th}$ to 75$^{th}$ percentile')
 ax.set(title='Relative Humidity', ylim=(0, 6), xlim=(0, 100), xlabel='RH (%)')
-ax.text(0.02, 1.03, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0, 1.03, '(b)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # Saturated layer fraction
 da = sonde_data['rh'].sel(height=slice(18, 6000)) >= 95 # water; lots of NaNs below 18m
 ax = axd['C']
 clim = da.astype(int)
-ax.plot(clim.sum('time')/len(clim.time), clim.height*M2KM, color='black', ls='--', lw=2, label='Climatology')
+ax.plot(clim.sum('time')/len(clim.time), clim.height*M2KM, color='black', ls='--', lw=2, label='2011-2023 winter mean')
 this_case = da[case].astype(int)
 ax.plot(this_case.sum('time')/len(this_case.time), this_case.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
 ax.set(title='Liquid-containing\nCloud Fraction', ylim=(0, 6), xlim=(0, 1), xlabel='Fraction')
 # ax.axhline(350, lw=2) # look for peak occurrence
-ax.text(0.02, 1.03, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
+ax.text(0, 1.03, '(c)', transform=ax.transAxes, fontsize=12, bbox=dict(facecolor='whitesmoke', edgecolor='white'))
 
 # Cloud fraction
 da = cld_mask
 ax = axd['D']
 clim = da.astype(int)
-ax.plot(clim.sum('time')/len(clim.time), clim.height*M2KM, color='black', ls='--', lw=2, label='Climatology')
+ax.plot(clim.sum('time')/len(clim.time), clim.height*M2KM, color='black', ls='--', lw=2, label='2011-2023 winter mean')
 this_case = da[case].astype(int)
 ax.plot(this_case.sum('time')/len(this_case.time), this_case.height*M2KM, color=COLOR['dark green'], lw=2, label='PWV>90th')
 ax.set(title='Cloud Fraction', ylim=(0, 6), xlim=(0, 1), xlabel='Fraction')
@@ -1966,8 +1990,9 @@ plt.savefig(save_filename, bbox_inches='tight')
 # plt.show()
 
 
-### LWP distributions by cloud base temperature bin##
-save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a11.pdf')
+### LWP distributions by cloud base temperature bin ###
+
+save_filename = os.path.join(APPENDIX_SAVE_DIR, 'a03.pdf')
 # Combined LWP by cbT bins
 lwp_props = dict(linewidth=2, color='black')
 lwp_median = dict(linewidth=2, color='black')
